@@ -1,6 +1,9 @@
 package mcmodel
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"gorm.io/gorm"
+)
 
 type Dataset struct {
 	ID            int
@@ -40,4 +43,35 @@ type FileSelection struct {
 	ExcludeFiles []string `json:"exlude_files"`
 	IncludeDirs  []string `json:"include_dirs"`
 	ExcludeDirs  []string `json:"exclude_dirs"`
+}
+
+func (d Dataset) GetEntitiesFromTemplate(db *gorm.DB) ([]Entity, error) {
+	experimentIdsSubSubquery := db.Table("item2entity_selection").
+		Select("experiment_id").
+		Where("item_id = ?", d.ID).
+		Where("item_type = ?", "\\App\\Models\\Dataset")
+
+	entityIdsFromExperimentSubquery := db.Table("experiment2entity").
+		Select("entity_id").
+		Where("experiment_id in (?)", experimentIdsSubSubquery)
+
+	entityNamesFromExperimentSubquery := db.Table("item2entity_selection").
+		Select("entity_name").
+		Where("item_id = ?", d.ID).
+		Where("item_type = ?", "\\App\\Models\\Dataset").
+		Where("experiment_id in (?)", experimentIdsSubSubquery)
+
+	entityIdSubquery := db.Table("item2entity_selection").
+		Select("entity_id").
+		Where("item_id = ?", d.ID).
+		Where("item_type = ?", "\\App\\Models\\Dataset")
+
+	var entities []Entity
+	result := db.Preload("Files.Directory").
+		Where("id in (?)", entityIdsFromExperimentSubquery).
+		Where("name in (?)", entityNamesFromExperimentSubquery).
+		Or("id in (?)", entityIdSubquery).
+		Find(&entities)
+
+	return entities, result.Error
 }
