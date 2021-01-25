@@ -1,4 +1,4 @@
-package gomcdb
+package mcdb
 
 import (
 	"fmt"
