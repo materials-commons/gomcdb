@@ -5,6 +5,7 @@ import "encoding/json"
 type Dataset struct {
 	ID            int
 	UUID          string
+	ProjectID     int
 	License       string
 	LicenseLink   string
 	Description   string
