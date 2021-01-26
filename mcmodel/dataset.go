@@ -2,11 +2,15 @@ package mcmodel
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm"
+	"path/filepath"
 )
 
 type Dataset struct {
 	ID            int
+	Name          string
 	UUID          string
 	ProjectID     int
 	License       string
@@ -15,22 +19,17 @@ type Dataset struct {
 	Summary       string
 	DOI           string
 	Authors       string
+	Files         []File `gorm:"many2many:dataset2file"`
 	FileSelection string
 }
 
-//func (f *FileSelection) Scan(src interface{}) error {
-//	fmt.Println("Calling Scan")
-//	// The data stored in a JSON field is actually returned as []uint8
-//	val := src.([]byte)
-//	var fs FileSelection
-//	err := json.Unmarshal(val, &fs)
-//	if err != nil {
-//		fmt.Println("json.Unmarshal failed:", err)
-//		return err
-//	}
-//	*f = fs
-//	return nil
-//}
+func (d Dataset) ZipfileDir(mcfsDir string) string {
+	return filepath.Join(mcfsDir, "zipfiles", d.UUID)
+}
+
+func (d Dataset) ZipfilePath(mcfsDir string) string {
+	return filepath.Join(d.ZipfileDir(mcfsDir), fmt.Sprintf("%s.zip", slug.Make(d.Name)))
+}
 
 func (d Dataset) GetFileSelection() (*FileSelection, error) {
 	var fs FileSelection
@@ -43,6 +42,13 @@ type FileSelection struct {
 	ExcludeFiles []string `json:"exlude_files"`
 	IncludeDirs  []string `json:"include_dirs"`
 	ExcludeDirs  []string `json:"exclude_dirs"`
+}
+
+func (d Dataset) GetFiles(db *gorm.DB) *gorm.DB {
+	return db.Preload("Directory").Where("id in (?)",
+		db.Table("dataset2file").
+			Select("file_id").
+			Where("dataset_id = ?", d.ID))
 }
 
 func (d Dataset) GetEntitiesFromTemplate(db *gorm.DB) ([]Entity, error) {
