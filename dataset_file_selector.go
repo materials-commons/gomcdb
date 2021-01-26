@@ -35,7 +35,11 @@ func (s *DatasetFileSelector) LoadEntityFiles(db *gorm.DB) error {
 		return err
 	}
 
-	_ = entities
+	for _, entity := range entities {
+		for _, file := range entity.Files {
+			s.EntityFiles[file.FullPath()] = true
+		}
+	}
 	return nil
 }
 

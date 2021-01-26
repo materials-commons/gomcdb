@@ -49,7 +49,7 @@ func (d Dataset) GetEntitiesFromTemplate(db *gorm.DB) ([]Entity, error) {
 	experimentIdsSubSubquery := db.Table("item2entity_selection").
 		Select("experiment_id").
 		Where("item_id = ?", d.ID).
-		Where("item_type = ?", "\\App\\Models\\Dataset")
+		Where("item_type = ?", "App\\Models\\Dataset")
 
 	entityIdsFromExperimentSubquery := db.Table("experiment2entity").
 		Select("entity_id").
@@ -58,13 +58,13 @@ func (d Dataset) GetEntitiesFromTemplate(db *gorm.DB) ([]Entity, error) {
 	entityNamesFromExperimentSubquery := db.Table("item2entity_selection").
 		Select("entity_name").
 		Where("item_id = ?", d.ID).
-		Where("item_type = ?", "\\App\\Models\\Dataset").
+		Where("item_type = ?", "App\\Models\\Dataset").
 		Where("experiment_id in (?)", experimentIdsSubSubquery)
 
 	entityIdSubquery := db.Table("item2entity_selection").
 		Select("entity_id").
 		Where("item_id = ?", d.ID).
-		Where("item_type = ?", "\\App\\Models\\Dataset")
+		Where("item_type = ?", "App\\Models\\Dataset")
 
 	var entities []Entity
 	result := db.Preload("Files.Directory").
