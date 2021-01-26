@@ -9,6 +9,7 @@ import (
 type File struct {
 	ID          int       `json:"id"`
 	UUID        string    `json:"string"`
+	UsesUUID    string    `json:"uses_uuid"`
 	ProjectID   int       `json:"project_id"`
 	Name        string    `json:"name"`
 	OwnerID     int       `json:"owner_id"`
@@ -49,10 +50,18 @@ func (f File) FullPath() string {
 }
 
 func (f File) ToPath(mcdir string) string {
-	return filepath.Join(f.ToDirPath(mcdir), f.UUID)
+	return filepath.Join(f.ToDirPath(mcdir), f.UUIDForPath())
 }
 
 func (f File) ToDirPath(mcdir string) string {
-	uuidParts := strings.Split(f.UUID, "-")
+	uuidParts := strings.Split(f.UUIDForPath(), "-")
 	return filepath.Join(mcdir, uuidParts[1][0:2], uuidParts[1][2:4])
+}
+
+func (f File) UUIDForPath() string {
+	if f.UsesUUID != "" {
+		return f.UsesUUID
+	}
+
+	return f.UUID
 }
