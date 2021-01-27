@@ -6,6 +6,7 @@ import (
 	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 	"path/filepath"
+	"time"
 )
 
 type Dataset struct {
@@ -21,6 +22,9 @@ type Dataset struct {
 	Authors       string
 	Files         []File `gorm:"many2many:dataset2file"`
 	FileSelection string
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	PublishedAt   time.Time
 }
 
 func (d Dataset) ZipfileDir(mcfsDir string) string {
