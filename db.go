@@ -2,14 +2,14 @@ package mcdb
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
+	"os"
 )
 
-func MakeDSNFromViper() string {
+func MakeDSNFromEnv() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		viper.Get("DB_USERNAME"),
-		viper.Get("DB_PASSWORD"),
-		viper.Get("DB_HOST"),
-		viper.Get("DB_PORT"),
-		viper.Get("DB_DATABASE"))
+		os.Getenv("DB_USERNAME"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_DATABASE"))
 }
