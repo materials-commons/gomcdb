@@ -86,25 +86,18 @@ func TestDataset_GetEntitiesFromTemplate(t *testing.T) {
 	}
 }
 
-/*
- select * from `entities` where `id` in
-	(select `entity_id` from `experiment2entity` where `experiment_id` in
-		(select `experiment_id` from `item2entity_selection` where `item_id` = ? and `item_type` = ?))
- and `name` in
-	(select `entity_name` from `item2entity_selection` where `item_id` = ? and `item_type` = ? and `experiment_id` in
-		(select `experiment_id` from `item2entity_selection` where `item_id` = ? and `item_type` = ?))
- or `id` in
-	(select `entity_id` from `item2entity_selection` where `item_id` = ? and `item_type` = ?)"
+func TestDatasetTime(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	//dsn := os.Getenv("MC_DB_DSN")
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
 
-Gorm generated:
+	var ds Dataset
+	result := db.Find(&ds, 3)
+	require.NoError(t, result.Error, "Query returned error: %s", result.Error)
+	fmt.Printf("%+v\n", ds)
 
- SELECT * FROM `entities` WHERE id in
-	(SELECT entity_id FROM `experiment2entity` WHERE experiment_id in
-		(SELECT experiment_id FROM `item2entity_selection` WHERE item_id = 1 AND item_type = '\App\Models\Dataset'))
- AND name in
-	(SELECT entity_name FROM `item2entity_selection` WHERE item_id = 1 AND item_type = '\App\Models\Dataset' AND experiment_id in
-		(SELECT experiment_id FROM `item2entity_selection` WHERE item_id = 1 AND item_type = '\App\Models\Dataset'))
- OR id in
-	(SELECT entity_id FROM `item2entity_selection` WHERE item_id = 1 AND item_type = '\App\Models\Dataset')
-
-*/
+	fmt.Println("time is: ", ds.PublishedAt.IsZero())
+}
