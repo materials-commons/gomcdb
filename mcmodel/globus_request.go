@@ -7,7 +7,6 @@ type GlobusRequest struct {
 	UUID             string    `json:"string"`
 	ProjectID        int       `json:"project_id"`
 	Name             string    `json:"name"`
-	Pid              int       `json:"pid"`
 	State            string    `json:"state"`
 	OwnerID          int       `json:"owner_id"`
 	Owner            *User     `gorm:"foreignKey:OwnerID;references:ID"`
@@ -15,6 +14,7 @@ type GlobusRequest struct {
 	GlobusAclID      string    `json:"globus_acl_id"`
 	GlobusPath       string    `json:"globus_path"`
 	GlobusIdentityID string    `json:"globus_identity_id"`
+	LastActiveAt     time.Time `json:"last_active_at"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
