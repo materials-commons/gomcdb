@@ -7,21 +7,22 @@ import (
 )
 
 type File struct {
-	ID          int       `json:"id"`
-	UUID        string    `json:"string"`
-	UsesUUID    string    `json:"uses_uuid"`
-	ProjectID   int       `json:"project_id"`
-	Name        string    `json:"name"`
-	OwnerID     int       `json:"owner_id"`
-	Path        string    `json:"path"`
-	DirectoryID int       `json:"directory_id"`
-	Size        uint64    `json:"size"`
-	Checksum    string    `json:"checksum"`
-	MimeType    string    `json:"mime_type"`
-	Current     bool      `json:"current"`
-	Directory   *File     `json:"directory" gorm:"foreignKey:DirectoryID;references:ID"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID                   int       `json:"id"`
+	UUID                 string    `json:"string"`
+	UsesUUID             string    `json:"uses_uuid"`
+	ProjectID            int       `json:"project_id"`
+	Name                 string    `json:"name"`
+	OwnerID              int       `json:"owner_id"`
+	Path                 string    `json:"path"`
+	DirectoryID          int       `json:"directory_id"`
+	Size                 uint64    `json:"size"`
+	Checksum             string    `json:"checksum"`
+	MimeType             string    `json:"mime_type"`
+	MediaTypeDescription string    `json:"media_type_description"`
+	Current              bool      `json:"current"`
+	Directory            *File     `json:"directory" gorm:"foreignKey:DirectoryID;references:ID"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
 }
 
 func (File) TableName() string {
