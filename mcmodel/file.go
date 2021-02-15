@@ -50,11 +50,11 @@ func (f File) FullPath() string {
 	return f.Directory.Path + "/" + f.Name
 }
 
-func (f File) ToPath(mcdir string) string {
-	return filepath.Join(f.ToDirPath(mcdir), f.UUIDForPath())
+func (f File) ToUnderlyingFilePath(mcdir string) string {
+	return filepath.Join(f.ToUnderlyingDirPath(mcdir), f.UUIDForPath())
 }
 
-func (f File) ToDirPath(mcdir string) string {
+func (f File) ToUnderlyingDirPath(mcdir string) string {
 	uuidParts := strings.Split(f.UUIDForPath(), "-")
 	return filepath.Join(mcdir, uuidParts[1][0:2], uuidParts[1][2:4])
 }
