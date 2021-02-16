@@ -11,6 +11,7 @@ type GlobusRequestFile struct {
 	GlobusRequestID int            `json:"globus_request_id"`
 	GlobusRequest   *GlobusRequest `gorm:"foreignKey:GlobusRequestID;references:ID"`
 	Name            string         `json:"name"`
+	State           string         `json:"state"`
 	FileID          int            `json:"file_id"`
 	File            *File          `gorm:"foreignKey:FileID;references:ID"`
 	CreatedAt       time.Time      `json:"created_at"`
