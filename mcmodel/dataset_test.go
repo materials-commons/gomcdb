@@ -1,12 +1,14 @@
 package mcmodel
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"os"
-	"testing"
 )
 
 func TestQueryDataset(t *testing.T) {
@@ -100,4 +102,38 @@ func TestDatasetTime(t *testing.T) {
 	fmt.Printf("%+v\n", ds)
 
 	fmt.Println("time is: ", ds.PublishedAt.IsZero())
+}
+
+func TestLoadGlobusRequest(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	//dsn := os.Getenv("MC_DB_DSN")
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
+
+	var globusTransfer GlobusTransfer
+	result := db.Preload("Owner").Find(&globusTransfer, 2)
+	require.NoError(t, result.Error, "Unable to find globus request 2: %s", result.Error)
+	fmt.Printf("%+v\n", globusTransfer)
+}
+
+func TestGormDoesNotExist(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	//dsn := os.Getenv("MC_DB_DSN")
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
+
+	var f File
+
+	result := db.Preload("Directory").
+		Where("directory_id = ?", 20).
+		Where("name = ?", "blah").
+		Where("current = ?", true).
+		First(&f)
+	fmt.Println("err:", result.Error)
+
+	require.True(t, errors.Is(result.Error, gorm.ErrRecordNotFound))
 }
