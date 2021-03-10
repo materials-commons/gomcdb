@@ -137,3 +137,24 @@ func TestGormDoesNotExist(t *testing.T) {
 
 	require.True(t, errors.Is(result.Error, gorm.ErrRecordNotFound))
 }
+
+func TestLoadTransferRequest(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
+
+	var tr TransferRequest
+
+	result := db.Preload("GlobusTransfer").First(&tr, 6)
+	if result.Error != nil {
+		t.Fatalf("Couldn't locate TransferRequest: %s", result.Error)
+	}
+
+	if tr.GlobusTransfer == nil {
+		t.Fatalf("GlobusTransfer should NOT be nil")
+	}
+
+	fmt.Printf("%+v\n", tr.GlobusTransfer)
+}
