@@ -158,3 +158,65 @@ func TestLoadTransferRequest(t *testing.T) {
 
 	fmt.Printf("%+v\n", tr.GlobusTransfer)
 }
+
+func TestLoadPojects(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
+
+	var projects []Project
+	result := db.Where("team_id in (select team_id from team2admin where user_id = ?)", 130).
+		Or("team_id in (select team_id from team2member where user_id = ?)", 130).
+		Find(&projects)
+	if result.Error != nil {
+		t.Fatalf("Query failed: %s", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		t.Fatalf("Query returned no results")
+	}
+
+	fmt.Printf("%+v\n", projects)
+}
+
+func TestFirstNoMatch(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
+
+	var user User
+	result := db.Where("api_token = ?", "no-such-token").First(&user)
+
+	if result.Error == nil {
+		t.Fatalf("Should have gotten an error looking for an api_token that doesn't exist")
+	}
+
+	fmt.Printf("result.Error = %s\n", result.Error)
+}
+
+func TestProjectFilesType(t *testing.T) {
+	dsn := "mc:mcpw@tcp(127.0.0.1:3306)/mc?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Errorf("Failed to open db: %s", err)
+	}
+
+	var project Project
+	result := db.First(&project, 1)
+
+	if result.Error != nil {
+		t.Fatalf("Error retrieving project 1: %s", result.Error)
+	}
+
+	fmt.Printf("%+v\n", project)
+
+	fileTypes, err := project.GetFileTypes()
+	if err != nil {
+		t.Fatalf("Error converting file types to map: %s", err)
+	}
+	fmt.Printf("%+v\n", fileTypes)
+}

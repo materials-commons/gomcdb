@@ -43,7 +43,7 @@ func (d Dataset) GetFileSelection() (*FileSelection, error) {
 
 type FileSelection struct {
 	IncludeFiles []string `json:"include_files"`
-	ExcludeFiles []string `json:"exlude_files"`
+	ExcludeFiles []string `json:"exclude_files"`
 	IncludeDirs  []string `json:"include_dirs"`
 	ExcludeDirs  []string `json:"exclude_dirs"`
 }
