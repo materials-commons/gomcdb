@@ -6,15 +6,18 @@ import (
 )
 
 type Project struct {
-	ID        int       `json:"id"`
-	UUID      string    `json:"uuid"`
-	Name      string    `json:"name"`
-	TeamID    int       `json:"team_id"`
-	OwnerID   int       `json:"owner_id"`
-	Owner     *User     `gorm:"foreignKey:OwnerID;references:ID"`
-	FileTypes string    `json:"file_types"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID             int       `json:"id"`
+	UUID           string    `json:"uuid"`
+	Name           string    `json:"name"`
+	TeamID         int       `json:"team_id"`
+	OwnerID        int       `json:"owner_id"`
+	Owner          *User     `gorm:"foreignKey:OwnerID;references:ID"`
+	Size           int64     `json:"size"`
+	FileCount      int       `json:"file_count"`
+	DirectoryCount int       `json:"directory_count"`
+	FileTypes      string    `json:"file_types"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 func (p Project) GetFileTypes() (map[string]int, error) {
