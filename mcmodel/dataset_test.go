@@ -218,5 +218,32 @@ func TestProjectFilesType(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error converting file types to map: %s", err)
 	}
+
 	fmt.Printf("%+v\n", fileTypes)
+
+	fileTypes["Text"] = 2
+	fileTypesAsStr, err := project.ToFileTypeAsString(fileTypes)
+	if err != nil {
+		t.Fatalf("Unable to convert file types to str: %s", err)
+	}
+
+	result = db.Model(project).Update("file_types", fileTypesAsStr)
+	if result.Error != nil {
+		t.Fatalf("Error updating file types: %s", result.Error)
+	}
+
+	result = db.First(&project, 1)
+
+	if result.Error != nil {
+		t.Fatalf("Error retrieving project 1: %s", result.Error)
+	}
+
+	fmt.Printf("%+v\n", project)
+
+	fileTypes, err = project.GetFileTypes()
+	if err != nil {
+		t.Fatalf("Error converting file types to map: %s", err)
+	}
+	fmt.Printf("%+v\n", fileTypes)
+
 }
