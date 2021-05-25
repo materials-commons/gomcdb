@@ -3,10 +3,11 @@ package mcmodel
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gosimple/slug"
-	"gorm.io/gorm"
 	"path/filepath"
 	"time"
+
+	"github.com/gosimple/slug"
+	"gorm.io/gorm"
 )
 
 type Dataset struct {
