@@ -3,6 +3,7 @@ package mcmodel
 import "encoding/json"
 
 const (
+	ValueTypeUnset          = 0
 	ValueTypeInt            = 1
 	ValueTypeFloat          = 2
 	ValueTypeString         = 3
@@ -33,6 +34,10 @@ type AttributeValue struct {
 }
 
 func (a *Attribute) LoadValue() error {
+	if a.Value.ValueType != ValueTypeUnset {
+		return nil
+	}
+
 	var val map[string]interface{}
 	if err := json.Unmarshal([]byte(a.Val), &val); err != nil {
 		return err
@@ -51,13 +56,16 @@ func (a *Attribute) LoadValue() error {
 		a.Value.ValueType = ValueTypeArrayOfFloat
 		a.Value.ValueArrayOfFloat = val["val"].([]float64)
 	case string:
-		return nil
+		a.Value.ValueType = ValueTypeString
+		a.Value.ValueString = val["val"].(string)
 	case []string:
-		return nil
+		// support later
 	case map[interface{}]interface{}:
-		return nil
+		// support later
 	case []map[interface{}]interface{}:
+		// support later
 	default:
+		// What to do here?
 	}
 
 	return nil
