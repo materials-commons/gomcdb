@@ -69,7 +69,7 @@ func (a *Attribute) LoadValue() error {
 		if strings.Contains(valAsStr, ".") {
 			// Try and convert to float, if that fails, then keep as string
 			valAsFloat, err := strconv.ParseFloat(valAsStr, 64)
-			if err != nil {
+			if err == nil {
 				a.Value.ValueType = ValueTypeFloat
 				a.Value.ValueFloat = valAsFloat
 				return nil
@@ -78,7 +78,7 @@ func (a *Attribute) LoadValue() error {
 
 		// Float failed so try and convert to int and if that is successful store as int, otherwise as string
 		valAsInt, err := strconv.ParseInt(valAsStr, 10, 64)
-		if err != nil {
+		if err == nil {
 			a.Value.ValueType = ValueTypeInt
 			a.Value.ValueInt = valAsInt
 			return nil
