@@ -2,6 +2,8 @@ package mcmodel
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -61,8 +63,30 @@ func (a *Attribute) LoadValue() error {
 		a.Value.ValueType = ValueTypeArrayOfFloat
 		a.Value.ValueArrayOfFloat = val["value"].([]float64)
 	case string:
+		// Lots of numeric values are stored as strings, so we need to check and convert
+		valAsStr := val["value"].(string)
+
+		if strings.Contains(valAsStr, ".") {
+			// Try and convert to float, if that fails, then keep as string
+			valAsFloat, err := strconv.ParseFloat(valAsStr, 64)
+			if err != nil {
+				a.Value.ValueType = ValueTypeFloat
+				a.Value.ValueFloat = valAsFloat
+				return nil
+			}
+		}
+
+		// Float failed so try and convert to int and if that is successful store as int, otherwise as string
+		valAsInt, err := strconv.ParseInt(valAsStr, 10, 64)
+		if err != nil {
+			a.Value.ValueType = ValueTypeInt
+			a.Value.ValueInt = valAsInt
+			return nil
+		}
+
+		// Nope, its still a string
 		a.Value.ValueType = ValueTypeString
-		a.Value.ValueString = val["value"].(string)
+		a.Value.ValueString = valAsStr
 	case []string:
 		// support later
 	case map[interface{}]interface{}:
