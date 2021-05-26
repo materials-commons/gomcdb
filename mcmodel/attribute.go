@@ -2,7 +2,6 @@ package mcmodel
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 const (
@@ -47,23 +46,23 @@ func (a *Attribute) LoadValue() error {
 	if err := json.Unmarshal([]byte(a.Val), &val); err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n", val)
+	//fmt.Printf("%+v\n", val)
 	switch val["value"].(type) {
 	case int:
 		a.Value.ValueType = ValueTypeInt
-		a.Value.ValueInt = val["val"].(int64)
+		a.Value.ValueInt = val["value"].(int64)
 	case []int:
 		a.Value.ValueType = ValueTypeArrayOfInt
-		a.Value.ValueArrayOfInt = val["val"].([]int64)
+		a.Value.ValueArrayOfInt = val["value"].([]int64)
 	case float32, float64:
 		a.Value.ValueType = ValueTypeFloat
-		a.Value.ValueFloat = val["val"].(float64)
+		a.Value.ValueFloat = val["value"].(float64)
 	case []float32, []float64:
 		a.Value.ValueType = ValueTypeArrayOfFloat
-		a.Value.ValueArrayOfFloat = val["val"].([]float64)
+		a.Value.ValueArrayOfFloat = val["value"].([]float64)
 	case string:
 		a.Value.ValueType = ValueTypeString
-		a.Value.ValueString = val["val"].(string)
+		a.Value.ValueString = val["value"].(string)
 	case []string:
 		// support later
 	case map[interface{}]interface{}:
@@ -71,7 +70,7 @@ func (a *Attribute) LoadValue() error {
 	case []map[interface{}]interface{}:
 		// support later
 	default:
-		fmt.Printf("Unknown cast type for attribute %s\n", a.Name)
+		//fmt.Printf("Unknown cast type for attribute %s\n", a.Name)
 		// What to do here?
 	}
 
