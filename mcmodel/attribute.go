@@ -1,6 +1,9 @@
 package mcmodel
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 const (
 	ValueTypeUnset          = 0
@@ -44,6 +47,7 @@ func (a *Attribute) LoadValue() error {
 	if err := json.Unmarshal([]byte(a.Val), &val); err != nil {
 		return err
 	}
+	fmt.Printf("%+v\n", val)
 	switch val["val"].(type) {
 	case int:
 		a.Value.ValueType = ValueTypeInt
@@ -67,6 +71,7 @@ func (a *Attribute) LoadValue() error {
 	case []map[interface{}]interface{}:
 		// support later
 	default:
+		fmt.Printf("Unknown cast type for attribute %s\n", a.Name)
 		// What to do here?
 	}
 
