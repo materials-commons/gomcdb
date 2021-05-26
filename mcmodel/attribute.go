@@ -48,7 +48,7 @@ func (a *Attribute) LoadValue() error {
 		return err
 	}
 	fmt.Printf("%+v\n", val)
-	switch val["val"].(type) {
+	switch val["value"].(type) {
 	case int:
 		a.Value.ValueType = ValueTypeInt
 		a.Value.ValueInt = val["val"].(int64)
