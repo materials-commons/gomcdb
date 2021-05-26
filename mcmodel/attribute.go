@@ -15,10 +15,12 @@ const (
 )
 
 type Attribute struct {
-	ID    int
-	Name  string
-	Val   string
-	Value AttributeValue
+	ID               int
+	Name             string
+	AttributableID   int
+	AttributableType string
+	Val              string
+	Value            AttributeValue
 }
 
 type AttributeValue struct {
