@@ -20,7 +20,7 @@ type Attribute struct {
 	AttributableID   int
 	AttributableType string
 	Val              string
-	Value            AttributeValue
+	Value            AttributeValue `gorm:"-"`
 }
 
 type AttributeValue struct {
