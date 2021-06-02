@@ -2,7 +2,6 @@ package mcmodel
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -46,7 +45,6 @@ type AttributeValue struct {
 
 func (a *Attribute) LoadValues() error {
 	if len(a.AttributeValues) == 0 {
-		fmt.Println("a.AttributeValues len = 0")
 		return nil
 	}
 	for i := range a.AttributeValues {
