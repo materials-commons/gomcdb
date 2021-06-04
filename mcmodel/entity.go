@@ -8,6 +8,7 @@ type Entity struct {
 }
 
 type EntityState struct {
-	ID       int
-	EntityID int
+	ID         int
+	EntityID   int
+	Attributes []Attribute `gorm:"-"`
 }
