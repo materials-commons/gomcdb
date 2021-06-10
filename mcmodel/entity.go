@@ -1,14 +1,14 @@
 package mcmodel
 
 type Entity struct {
-	ID           int
-	Name         string
-	Files        []File `gorm:"many2many:entity2file"`
-	EntityStates []EntityState
+	ID           int           `json:"id"`
+	Name         string        `json:"name"`
+	Files        []File        `json:"files" gorm:"many2many:entity2file"`
+	EntityStates []EntityState `json:"entity_states"`
 }
 
 type EntityState struct {
-	ID         int
-	EntityID   int
-	Attributes []Attribute `gorm:"-"`
+	ID         int         `json:"id"`
+	EntityID   int         `json:"entity_id"`
+	Attributes []Attribute `json:"attributes" gorm:"-"`
 }

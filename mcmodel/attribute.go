@@ -19,24 +19,25 @@ const (
 )
 
 type Attribute struct {
-	ID               int
-	Name             string
-	AttributableID   int
-	AttributableType string
-	AttributeValues  []AttributeValue
+	ID               int              `json:"id"`
+	UUID             string           `json:"uuid"`
+	Name             string           `json:"name"`
+	AttributableID   int              `json:"attributable_id"`
+	AttributableType string           `json:"attributable_type"`
+	AttributeValues  []AttributeValue `json:"attribute_values"`
 }
 
 type AttributeValue struct {
-	ID                  int
-	UUID                string
-	AttributeID         int
-	Unit                string
-	Val                 string
-	ValueType           int                      `gorm:"-"`
-	ValueInt            int64                    `gorm:"-"`
-	ValueFloat          float64                  `gorm:"-"`
+	ID                  int                      `json:"id"`
+	UUID                string                   `json:"uuid"`
+	AttributeID         int                      `json:"attribute_id"`
+	Unit                string                   `json:"unit"`
+	Val                 string                   `json:"val"`
+	ValueType           int                      `json:"value_type" gorm:"-"`
+	ValueInt            int64                    `json:"value_int" gorm:"-"`
+	ValueFloat          float64                  `json:"value_float" gorm:"-"`
+	ValueString         string                   `json:"value_string" gorm:"-"`
 	ValueComplex        map[string]interface{}   `gorm:"-"`
-	ValueString         string                   `gorm:"-"`
 	ValueArrayOfInt     []int64                  `gorm:"-"`
 	ValueArrayOfFloat   []float64                `gorm:"-"`
 	ValueArrayOfString  []string                 `gorm:"-"`

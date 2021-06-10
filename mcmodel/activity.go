@@ -1,7 +1,7 @@
 package mcmodel
 
 type Activity struct {
-	ID         int
-	Name       string
-	Attributes []Attribute `gorm:"-"`
+	ID         int         `json:"id"`
+	Name       string      `json:"name"`
+	Attributes []Attribute `json:"attributes" gorm:"-"`
 }

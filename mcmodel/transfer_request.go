@@ -8,8 +8,8 @@ type TransferRequest struct {
 	State          string          `json:"state"`
 	ProjectID      int             `json:"project_id"`
 	OwnerID        int             `json:"owner_id"`
-	Owner          *User           `gorm:"foreignKey:OwnerID;references:ID"`
-	GlobusTransfer *GlobusTransfer `gorm:"foreignKey:transfer_request_id;references:id"`
+	Owner          *User           `json:"owner" gorm:"foreignKey:OwnerID;references:ID"`
+	GlobusTransfer *GlobusTransfer `json:"globus_transfer" gorm:"foreignKey:transfer_request_id;references:id"`
 	LastActiveAt   time.Time       `json:"last_active_at"`
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`

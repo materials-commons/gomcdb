@@ -11,21 +11,21 @@ import (
 )
 
 type Dataset struct {
-	ID            int
-	Name          string
-	UUID          string
-	ProjectID     int
-	License       string
-	LicenseLink   string
-	Description   string
-	Summary       string
-	DOI           string
-	Authors       string
-	Files         []File `gorm:"many2many:dataset2file"`
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	UUID          string `json:"uuid"`
+	ProjectID     int    `json:"project_id"`
+	License       string `json:"license"`
+	LicenseLink   string `json:"license_link"`
+	Description   string `json:"description"`
+	Summary       string `json:"summary"`
+	DOI           string `json:"doi"`
+	Authors       string `json:"authors"`
+	Files         []File `json:"files" gorm:"many2many:dataset2file"`
 	FileSelection string
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
-	PublishedAt   time.Time
+	PublishedAt   time.Time `json:"published_at"`
 }
 
 func (d Dataset) ZipfileDir(mcfsDir string) string {
