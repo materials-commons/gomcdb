@@ -245,5 +245,4 @@ func TestProjectFilesType(t *testing.T) {
 		t.Fatalf("Error converting file types to map: %s", err)
 	}
 	fmt.Printf("%+v\n", fileTypes)
-
 }
