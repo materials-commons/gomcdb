@@ -183,7 +183,13 @@ func (s *FileStore) CreateFile(name string, projectID, directoryID, ownerID int,
 		Current:     false,
 	}
 
-	if err := s.db.Create(newFile).Error; err != nil {
+	var err error
+
+	if newFile.UUID, err = uuid.GenerateUUID(); err != nil {
+		return nil, err
+	}
+
+	if err = s.db.Create(newFile).Error; err != nil {
 		return nil, err
 	}
 
