@@ -51,6 +51,39 @@ func (s *ProjectStore) UpdateProjectDirectoryCount(projectID int, directoryCount
 	})
 }
 
+func (s *ProjectStore) UserCanAccessProject(userID, projectID int) bool {
+	var project mcmodel.Project
+
+	if err := s.db.Find(&project, projectID).Error; err != nil {
+		return false
+	}
+
+	if project.OwnerID == userID {
+		return true
+	}
+
+	var userCount int64
+	s.db.Table("team2member").
+		Where("user_id = ?", userID).
+		Where("team_id = ?", project.TeamID).
+		Count(&userCount)
+
+	if userCount != 0 {
+		return true
+	}
+
+	s.db.Table("team2admin").
+		Where("user_id = ?", userID).
+		Where("team_id = ?", project.TeamID).
+		Count(&userCount)
+
+	if userCount != 0 {
+		return true
+	}
+
+	return false
+}
+
 func (s *ProjectStore) withTxRetry(fn func(tx *gorm.DB) error) error {
 	return WithTxRetryDefault(fn, s.db)
 }
