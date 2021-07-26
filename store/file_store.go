@@ -171,6 +171,25 @@ func (s *FileStore) addFileToDatabase(file *mcmodel.File, dirID int, transferReq
 	return file, err
 }
 
+func (s *FileStore) CreateFile(name string, projectID, directoryID, ownerID int, mimeType string) (*mcmodel.File, error) {
+	newFile := &mcmodel.File{
+		ProjectID:   projectID,
+		Name:        name,
+		DirectoryID: directoryID,
+		Size:        0,
+		Checksum:    "",
+		MimeType:    mimeType,
+		OwnerID:     ownerID,
+		Current:     false,
+	}
+
+	if err := s.db.Create(newFile).Error; err != nil {
+		return nil, err
+	}
+
+	return newFile, nil
+}
+
 func incrementProjectFileTypeCountAndFilesCount(db *gorm.DB, projectID int, fileTypeDescription string) error {
 	var p mcmodel.Project
 	// Get latest for project
