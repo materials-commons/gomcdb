@@ -79,6 +79,48 @@ func (s *FileStore) MarkFileReleased(file *mcmodel.File, checksum string, projec
 	})
 }
 
+// UpdateMetadataForFileAndProject updates the metadata and project meta data for a file
+func (s *FileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
+	finfo, err := os.Stat(file.ToUnderlyingFilePath(s.mcfsRoot))
+	if err != nil {
+		log.Errorf("MarkFileReleased Stat %s failed: %s", file.ToUnderlyingFilePath(s.mcfsRoot), err)
+		return err
+	}
+
+	return s.withTxRetry(func(tx *gorm.DB) error {
+		// To set file as the current (ie viewable) version we first need to set all its previous
+		// versions to have current set to false.
+		err := tx.Model(&mcmodel.File{}).
+			Where("directory_id = ?", file.DirectoryID).
+			Where("name = ?", file.Name).
+			Update("current", false).Error
+
+		if err != nil {
+			return err
+		}
+
+		// Now we can update the meta data on the current file. This includes, the size, current, and if there is
+		// a new computed checksum, also update the checksum field.
+		fileMetadata := mcmodel.File{
+			Size:     uint64(finfo.Size()),
+			Current:  true,
+			Checksum: checksum,
+		}
+
+		if err := tx.Model(file).Updates(&fileMetadata).Error; err != nil {
+			return err
+		}
+
+		var project mcmodel.Project
+
+		if result := s.db.Find(&project, projectID); result.Error != nil {
+			return result.Error
+		}
+
+		return s.db.Model(&project).Updates(&mcmodel.Project{Size: project.Size + totalBytes}).Error
+	})
+}
+
 func (s *FileStore) MarkFileAsOpen(file *mcmodel.File) error {
 	return s.withTxRetry(func(tx *gorm.DB) error {
 		return tx.Model(&mcmodel.TransferRequestFile{}).
