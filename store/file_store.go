@@ -230,7 +230,7 @@ func (s *FileStore) FindDirByPath(projectID int, path string) (*mcmodel.File, er
 		Where("path = ?", path).
 		First(&dir).Error
 	if err != nil {
-		log.Errorf("Failed looking up directory in project %d, path %s: %s", projectID, path, err)
+		//log.Errorf("Failed looking up directory in project %d, path %s: %s", projectID, path, err)
 		return nil, err
 	}
 
@@ -269,6 +269,40 @@ func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transfer
 		if err := tx.Create(&dir).Error; err != nil {
 			return err
 		}
+
+		return s.db.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
+	})
+
+	return &dir, err
+}
+
+func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, ownerID int) (*mcmodel.File, error) {
+	var (
+		dir mcmodel.File
+		err error
+	)
+
+	err = s.withTxRetry(func(tx *gorm.DB) error {
+		dir = mcmodel.File{
+			OwnerID:              ownerID,
+			MimeType:             "directory",
+			MediaTypeDescription: "directory",
+			DirectoryID:          parentDirID,
+			Current:              true,
+			Path:                 path,
+			ProjectID:            projectID,
+			Name:                 name,
+		}
+
+		if dir.UUID, err = uuid.GenerateUUID(); err != nil {
+			return err
+		}
+
+		if err := tx.Create(&dir).Error; err != nil {
+			return err
+		}
+
+		project := mcmodel.Project{ID: projectID}
 
 		return s.db.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
 	})
