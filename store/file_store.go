@@ -2,7 +2,6 @@ package store
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -205,7 +204,7 @@ func (s *FileStore) addFileToDatabase(file *mcmodel.File, dirID int, transferReq
 		}
 
 		if updateProject {
-			return incrementProjectFileTypeCountAndFilesCount(s.db, transferRequest.ProjectID, mime.Mime2Description(file.MimeType))
+			return incrementProjectFileTypeCountAndFilesCount(tx, transferRequest.ProjectID, mime.Mime2Description(file.MimeType))
 		}
 
 		return nil
@@ -290,7 +289,7 @@ func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transfer
 		}
 
 		var project mcmodel.Project
-		if result := s.db.Find(&project, transferRequest.ProjectID); result.Error != nil {
+		if result := tx.Find(&project, transferRequest.ProjectID); result.Error != nil {
 			return result.Error
 		}
 
@@ -313,7 +312,7 @@ func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transfer
 			return err
 		}
 
-		return s.db.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
+		return tx.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
 	})
 
 	return &dir, err
@@ -325,7 +324,6 @@ func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, own
 		err error
 	)
 
-	fmt.Println("in CreateDir")
 	err = s.withTxRetry(func(tx *gorm.DB) error {
 		dir = mcmodel.File{
 			OwnerID:              ownerID,
@@ -348,10 +346,9 @@ func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, own
 
 		project := mcmodel.Project{ID: projectID}
 
-		return s.db.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
+		return tx.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
 	})
 
-	fmt.Println("Returning from CreateDir")
 	return &dir, err
 }
 
