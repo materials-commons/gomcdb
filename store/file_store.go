@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -324,6 +325,7 @@ func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, own
 		err error
 	)
 
+	fmt.Println("in CreateDir")
 	err = s.withTxRetry(func(tx *gorm.DB) error {
 		dir = mcmodel.File{
 			OwnerID:              ownerID,
@@ -349,6 +351,7 @@ func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, own
 		return s.db.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
 	})
 
+	fmt.Println("Returning from CreateDir")
 	return &dir, err
 }
 
