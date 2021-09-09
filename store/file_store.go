@@ -2,7 +2,6 @@ package store
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -24,7 +23,6 @@ func NewFileStore(db *gorm.DB, mcfsRoot string) *FileStore {
 
 // MarkFileReleased should only called for files that were created or opened with the Write flag set.
 func (s *FileStore) MarkFileReleased(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
-	fmt.Println("MarkFileReleased")
 	finfo, err := os.Stat(file.ToUnderlyingFilePath(s.mcfsRoot))
 	if err != nil {
 		log.Errorf("MarkFileReleased Stat %s failed: %s", file.ToUnderlyingFilePath(s.mcfsRoot), err)
@@ -83,7 +81,6 @@ func (s *FileStore) MarkFileReleased(file *mcmodel.File, checksum string, projec
 
 // UpdateMetadataForFileAndProject updates the metadata and project meta data for a file
 func (s *FileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
-	fmt.Println("UpdateMetadataForFileAndProject")
 	finfo, err := os.Stat(file.ToUnderlyingFilePath(s.mcfsRoot))
 	if err != nil {
 		log.Errorf("MarkFileReleased Stat %s failed: %s", file.ToUnderlyingFilePath(s.mcfsRoot), err)
@@ -125,7 +122,6 @@ func (s *FileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum
 }
 
 func (s *FileStore) MarkFileAsOpen(file *mcmodel.File) error {
-	fmt.Println("MarkFileAsOpen")
 	return s.withTxRetry(func(tx *gorm.DB) error {
 		return tx.Model(&mcmodel.TransferRequestFile{}).
 			Where("file_id = ?", file.ID).
@@ -171,7 +167,6 @@ func (s *FileStore) CreateNewFile(file, dir *mcmodel.File, transferRequest mcmod
 // to the database. The file parameter must be filled out, except for the UUID which will be generated
 // for the file. The TransferRequestFile will be created based on the file entry.
 func (s *FileStore) addFileToDatabase(file *mcmodel.File, dirID int, transferRequest mcmodel.TransferRequest, updateProject bool) (*mcmodel.File, error) {
-	fmt.Println("addFileToDatabase")
 	var (
 		err                     error
 		transferFileRequestUUID string
@@ -285,7 +280,6 @@ func (s *FileStore) FindDirByPath(projectID int, path string) (*mcmodel.File, er
 }
 
 func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
-	fmt.Println("CreateDirectory")
 	var dir mcmodel.File
 	err := s.withTxRetry(func(tx *gorm.DB) error {
 		err := tx.Where("path = ", path).Where("project_id = ?", transferRequest.ProjectID).Find(&dir).Error
@@ -325,7 +319,6 @@ func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transfer
 }
 
 func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, ownerID int) (*mcmodel.File, error) {
-	fmt.Println("CreateDir")
 	var (
 		dir mcmodel.File
 		err error
