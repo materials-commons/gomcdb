@@ -231,11 +231,11 @@ func (s *FileStore) CreateFile(name string, projectID, directoryID, ownerID int,
 		return nil, err
 	}
 
-	if err = s.db.Create(newFile).Error; err != nil {
-		return nil, err
-	}
+	err = s.withTxRetry(func(tx *gorm.DB) error {
+		return tx.Create(newFile).Error
+	})
 
-	return newFile, nil
+	return newFile, err
 }
 
 func incrementProjectFileTypeCountAndFilesCount(db *gorm.DB, projectID int, fileTypeDescription string) error {
