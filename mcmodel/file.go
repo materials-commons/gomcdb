@@ -8,7 +8,7 @@ import (
 
 type File struct {
 	ID                   int       `json:"id"`
-	UUID                 string    `json:"string"`
+	UUID                 string    `json:"uuid"`
 	UsesUUID             string    `json:"uses_uuid"`
 	UsesID               int       `json:"uses_id"`
 	ProjectID            int       `json:"project_id"`
