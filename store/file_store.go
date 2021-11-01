@@ -266,8 +266,12 @@ func incrementProjectFileTypeCountAndFilesCount(db *gorm.DB, projectID int, file
 }
 
 func (s *FileStore) FindDirByPath(projectID int, path string) (*mcmodel.File, error) {
+	return findDirByPath(s.db, projectID, path)
+}
+
+func findDirByPath(db *gorm.DB, projectID int, path string) (*mcmodel.File, error) {
 	var dir mcmodel.File
-	err := s.db.Preload("Directory").
+	err := db.Preload("Directory").
 		Where("project_id = ?", projectID).
 		Where("path = ?", path).
 		First(&dir).Error
@@ -318,14 +322,20 @@ func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transfer
 	return &dir, err
 }
 
-func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, ownerID int) (*mcmodel.File, error) {
+func (s *FileStore) CreateDirIfNotExists(parentDirID int, path, name string, projectID, ownerID int) (*mcmodel.File, error) {
 	var (
-		dir mcmodel.File
+		dir *mcmodel.File
 		err error
 	)
 
 	err = s.withTxRetry(func(tx *gorm.DB) error {
-		dir = mcmodel.File{
+		dir, err = findDirByPath(tx, projectID, path)
+		if err == nil {
+			// dir found
+			return nil
+		}
+
+		dir = &mcmodel.File{
 			OwnerID:              ownerID,
 			MimeType:             "directory",
 			MediaTypeDescription: "directory",
@@ -340,7 +350,7 @@ func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, own
 			return err
 		}
 
-		if err := tx.Create(&dir).Error; err != nil {
+		if err := tx.Create(dir).Error; err != nil {
 			return err
 		}
 
@@ -349,7 +359,7 @@ func (s *FileStore) CreateDir(parentDirID int, path, name string, projectID, own
 		return tx.Model(&project).Updates(&mcmodel.Project{DirectoryCount: project.DirectoryCount + 1}).Error
 	})
 
-	return &dir, err
+	return dir, err
 }
 
 func (s *FileStore) ListDirectory(dir *mcmodel.File, transferRequest mcmodel.TransferRequest) ([]mcmodel.File, error) {
