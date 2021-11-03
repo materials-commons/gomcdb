@@ -451,6 +451,27 @@ func (s *FileStore) UpdateFileUses(file *mcmodel.File, uuid string, fileID int) 
 	})
 }
 
+func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
+	switched := false
+	err := s.withTxRetry(func(tx *gorm.DB) error {
+		var matched mcmodel.File
+		err := tx.Where("checksum = ?", file.Checksum).
+			Where("id <> ?", file.ID).
+			First(&matched).Error
+		if err == nil {
+			// found a match
+			switched = true
+			return tx.Model(file).Updates(mcmodel.File{
+				UsesUUID: matched.UsesUUID,
+				UsesID:   matched.UsesID,
+			}).Error
+		}
+		return nil
+	})
+
+	return switched, err
+}
+
 func (s *FileStore) withTxRetry(fn func(tx *gorm.DB) error) error {
 	return WithTxRetryDefault(fn, s.db)
 }
