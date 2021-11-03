@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -461,6 +462,8 @@ func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
 		if err == nil {
 			// found a match
 			switched = true
+			fmt.Printf("Updating %+v\n", file)
+			fmt.Printf("   To point at %+v\n", matched)
 			return tx.Model(file).Updates(mcmodel.File{
 				UsesUUID: matched.UsesUUID,
 				UsesID:   matched.UsesID,
