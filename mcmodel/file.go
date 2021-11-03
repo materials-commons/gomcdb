@@ -55,6 +55,11 @@ func (f File) ToUnderlyingFilePath(mcdir string) string {
 	return filepath.Join(f.ToUnderlyingDirPath(mcdir), f.UUIDForPath())
 }
 
+func (f File) ToUnderlyingFilePathForUUID(mcdir string) string {
+	uuidParts := strings.Split(f.UUID, "-")
+	return filepath.Join(mcdir, uuidParts[1][0:2], uuidParts[1][2:4], f.UUID)
+}
+
 func (f File) ToUnderlyingDirPath(mcdir string) string {
 	uuidParts := strings.Split(f.UUIDForPath(), "-")
 	return filepath.Join(mcdir, uuidParts[1][0:2], uuidParts[1][2:4])
