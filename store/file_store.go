@@ -367,6 +367,7 @@ func (s *FileStore) ListDirectory(dir *mcmodel.File, transferRequest mcmodel.Tra
 
 	err := s.db.Where("directory_id = ?", dir.ID).
 		Where("project_id", transferRequest.ProjectID).
+		Where("deleted_at IS NULL").
 		Where("current = true").
 		Find(&files).Error
 	if err != nil {
