@@ -72,3 +72,21 @@ func (f File) UUIDForPath() string {
 
 	return f.UUID
 }
+
+func (f File) isConvertible() bool {
+	switch f.MimeType {
+	case "application/msword",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		"application/vnd.ms-powerpoint",
+		"application/vnd.openxmlformats-officedocument.presentationml.presentation":
+		// Office documents that can be converted to PDF
+		return true
+	case "image/bmp",
+		"image/x-ms-bmp",
+		"image/tiff":
+		// images that need to be converted to JPEG to display on web
+		return true
+	default:
+		return false
+	}
+}
