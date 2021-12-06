@@ -73,7 +73,7 @@ func (f File) UUIDForPath() string {
 	return f.UUID
 }
 
-func (f File) isConvertible() bool {
+func (f File) IsConvertible() bool {
 	switch f.MimeType {
 	case "application/msword",
 		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
