@@ -73,6 +73,18 @@ func (f File) UUIDForPath() string {
 	return f.UUID
 }
 
+func (f File) IDForUses() int {
+	if f.UsesID != 0 {
+		return f.UsesID
+	}
+
+	return f.ID
+}
+
+func (f File) UUIDForUses() string {
+	return f.UUIDForPath()
+}
+
 func (f File) IsConvertible() bool {
 	switch f.MimeType {
 	case "application/msword",
