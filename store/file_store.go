@@ -414,6 +414,8 @@ func (s *FileStore) GetFileByPath(path string, transferRequest mcmodel.TransferR
 	fileName := filepath.Base(path)
 	var dir mcmodel.File
 	err := s.db.Where("project_id = ?", transferRequest.ProjectID).
+		Where("deleted_at IS NULL").
+		Where("current = true").
 		Where("path = ?", dirPath).
 		First(&dir).Error
 	if err != nil {
@@ -454,7 +456,7 @@ func (s *FileStore) UpdateFileUses(file *mcmodel.File, uuid string, fileID int) 
 }
 
 func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
-	switched := false
+	switched := false // Set to true in withTxRetry if an existing file with same checksum is found
 	err := s.withTxRetry(func(tx *gorm.DB) error {
 		var matched mcmodel.File
 		err := tx.Where("checksum = ?", file.Checksum).
@@ -463,9 +465,11 @@ func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
 		if err == nil {
 			// found a match
 			switched = true
+			usesUUID := matched.UUIDForUses()
+			usesID := matched.IDForUses()
 			return tx.Model(file).Updates(mcmodel.File{
-				UsesUUID: matched.UUID,
-				UsesID:   matched.ID,
+				UsesUUID: usesUUID,
+				UsesID:   usesID,
 			}).Error
 		}
 		return nil
