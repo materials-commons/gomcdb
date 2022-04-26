@@ -1,6 +1,7 @@
 package mcmodel
 
 import (
+	"io/fs"
 	"path/filepath"
 	"strings"
 	"time"
@@ -101,4 +102,50 @@ func (f File) IsConvertible() bool {
 	default:
 		return false
 	}
+}
+
+// Implement fs.FileInfo interface for a File
+// type FileInfo interface {
+//	Name() string       // base name of the file
+//	Size() int64        // length in bytes for regular files; system-dependent for others
+//	Mode() FileMode     // file mode bits
+//	ModTime() time.Time // modification time
+//	IsDir() bool        // abbreviation for Mode().IsDir()
+//	Sys() interface{}   // underlying data source (can return nil)
+//}
+
+type FileInfo struct {
+	file File
+}
+
+func (f File) ToFileInfo() FileInfo {
+	return FileInfo{file: f}
+}
+
+func (f FileInfo) Name() string {
+	return f.file.Name
+}
+
+func (f FileInfo) Size() int64 {
+	return int64(f.file.Size)
+}
+
+func (f FileInfo) Mode() fs.FileMode {
+	if f.file.IsDir() {
+		return fs.ModePerm & fs.ModeDir
+	}
+
+	return fs.ModePerm
+}
+
+func (f FileInfo) ModTime() time.Time {
+	return f.file.UpdatedAt
+}
+
+func (f FileInfo) IsDir() bool {
+	return f.file.IsDir()
+}
+
+func (f FileInfo) Sys() interface{} {
+	return nil
 }
