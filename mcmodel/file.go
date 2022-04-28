@@ -104,15 +104,7 @@ func (f File) IsConvertible() bool {
 	}
 }
 
-// Implement fs.FileInfo interface for a File
-// type FileInfo interface {
-//	Name() string       // base name of the file
-//	Size() int64        // length in bytes for regular files; system-dependent for others
-//	Mode() FileMode     // file mode bits
-//	ModTime() time.Time // modification time
-//	IsDir() bool        // abbreviation for Mode().IsDir()
-//	Sys() interface{}   // underlying data source (can return nil)
-//}
+//////////////////////////////////////////
 
 type FileInfo struct {
 	file File
@@ -148,4 +140,30 @@ func (f FileInfo) IsDir() bool {
 
 func (f FileInfo) Sys() interface{} {
 	return nil
+}
+
+////////////////////////////////////
+
+type DirEntry struct {
+	finfo FileInfo
+}
+
+func ToDirEntry(f File) DirEntry {
+	return DirEntry{finfo: f.ToFileInfo()}
+}
+
+func (d DirEntry) Name() string {
+	return d.finfo.Name()
+}
+
+func (d DirEntry) IsDir() bool {
+	return d.finfo.IsDir()
+}
+
+func (d DirEntry) Type() fs.FileMode {
+	return d.finfo.Mode()
+}
+
+func (d DirEntry) Info() (fs.FileInfo, error) {
+	return d.finfo, nil
 }
