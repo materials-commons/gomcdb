@@ -414,6 +414,24 @@ func (s *FileStore) ListDirectory(dir *mcmodel.File, transferRequest mcmodel.Tra
 	return files, nil
 }
 
+func (s *FileStore) ListDirectoryByPath(projectID int, path string) ([]mcmodel.File, error) {
+	dir, err := s.FindDirByPath(projectID, path)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []mcmodel.File
+
+	err = s.db.Where("directory_id = ?", dir.ID).
+		Where("project_id", projectID).
+		Where("deleted_at IS NULL").
+		Where("dataset_id IS NULL").
+		Where("current = true").
+		Find(&files).Error
+
+	return files, err
+}
+
 func (s *FileStore) GetFileByPath(path string, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
 	// Get directory so we can use its id for lookups
 	dirPath := filepath.Dir(path)
