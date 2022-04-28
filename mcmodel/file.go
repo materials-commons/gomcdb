@@ -148,7 +148,7 @@ type DirEntry struct {
 	finfo FileInfo
 }
 
-func ToDirEntry(f File) DirEntry {
+func (f File) ToDirEntry() DirEntry {
 	return DirEntry{finfo: f.ToFileInfo()}
 }
 
