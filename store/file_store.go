@@ -275,6 +275,7 @@ func findDirByPath(db *gorm.DB, projectID int, path string) (*mcmodel.File, erro
 		Where("project_id = ?", projectID).
 		Where("path = ?", path).
 		Where("deleted_at IS NULL").
+		Where("dataset_id IS NULL").
 		First(&dir).Error
 	if err != nil {
 		//log.Errorf("Failed looking up directory in project %d, path %s: %s", projectID, path, err)
@@ -287,7 +288,11 @@ func findDirByPath(db *gorm.DB, projectID int, path string) (*mcmodel.File, erro
 func (s *FileStore) CreateDirectory(parentDirID int, path, name string, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
 	var dir mcmodel.File
 	err := s.withTxRetry(func(tx *gorm.DB) error {
-		err := tx.Where("path = ", path).Where("project_id = ?", transferRequest.ProjectID).Find(&dir).Error
+		err := tx.Where("path = ", path).
+			Where("deleted_at IS NULL").
+			Where("dataset_id IS NULL").
+			Where("project_id = ?", transferRequest.ProjectID).
+			Find(&dir).Error
 		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 			// directory already exists no need to create
 			return nil
@@ -369,6 +374,7 @@ func (s *FileStore) ListDirectory(dir *mcmodel.File, transferRequest mcmodel.Tra
 	err := s.db.Where("directory_id = ?", dir.ID).
 		Where("project_id", transferRequest.ProjectID).
 		Where("deleted_at IS NULL").
+		Where("dataset_id IS NULL").
 		Where("current = true").
 		Find(&files).Error
 	if err != nil {
@@ -415,6 +421,7 @@ func (s *FileStore) GetFileByPath(path string, transferRequest mcmodel.TransferR
 	var dir mcmodel.File
 	err := s.db.Where("project_id = ?", transferRequest.ProjectID).
 		Where("deleted_at IS NULL").
+		Where("dataset_id IS NULL").
 		Where("current = true").
 		Where("path = ?", dirPath).
 		First(&dir).Error
@@ -440,6 +447,8 @@ func (s *FileStore) GetFileByPath(path string, transferRequest mcmodel.TransferR
 	err = s.db.Preload("Directory").
 		Where("directory_id = ?", dir.ID).
 		Where("name = ?", fileName).
+		Where("deleted_at IS NULL").
+		Where("dataset_id IS NULL").
 		Where("current = ?", true).
 		First(&file).Error
 
@@ -460,6 +469,7 @@ func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
 	err := s.withTxRetry(func(tx *gorm.DB) error {
 		var matched mcmodel.File
 		err := tx.Where("checksum = ?", file.Checksum).
+			Where("deleted_at IS NULL").
 			Where("id <> ?", file.ID).
 			First(&matched).Error
 		if err == nil {
