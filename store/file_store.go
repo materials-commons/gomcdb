@@ -455,6 +455,28 @@ func (s *FileStore) GetFileByPath(path string, transferRequest mcmodel.TransferR
 	return &file, err
 }
 
+func (s *FileStore) FindFileByPath(projectID int, path string) (*mcmodel.File, error) {
+	dirPath := filepath.Dir(path)
+	dir, err := s.FindDirByPath(projectID, dirPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var file mcmodel.File
+	err = s.db.Preload("Directory").
+		Where("directory_id = ?", dir.ID).
+		Where("name = ?", filepath.Base(path)).
+		Where("deleted_at IS NULL").
+		Where("dataset_id IS NULL").
+		Where("current = ?", true).
+		First(&file).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &file, nil
+}
+
 func (s *FileStore) UpdateFileUses(file *mcmodel.File, uuid string, fileID int) error {
 	return s.withTxRetry(func(tx *gorm.DB) error {
 		return tx.Model(file).Updates(mcmodel.File{
