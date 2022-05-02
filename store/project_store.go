@@ -23,6 +23,15 @@ func (s *ProjectStore) FindProject(projectID int) (*mcmodel.Project, error) {
 	return &project, nil
 }
 
+func (s *ProjectStore) GetProjectBySlug(slug string) (*mcmodel.Project, error) {
+	var project mcmodel.Project
+	if err := s.db.Where("slug = ?", slug).First(&project).Error; err != nil {
+		return nil, err
+	}
+
+	return &project, nil
+}
+
 func (s *ProjectStore) GetProjectsForUser(userID int) (error, []mcmodel.Project) {
 	var projects []mcmodel.Project
 
