@@ -208,6 +208,49 @@ func (s *FileStore) ListDirectoryByPath(projectID int, path string) ([]mcmodel.F
 	return files, err
 }
 
+// FindOrCreateDirPath will create all entries in the directory path if the path doesn't exist
+func (s *FileStore) FindOrCreateDirPath(projectID, ownerID int, path string) (*mcmodel.File, error) {
+	dir, err := s.FindDirByPath(projectID, path)
+	if err == nil {
+		// If we are here then the path was found, and we have nothing left to do.
+		return dir, nil
+	}
+
+	// If we are here then directory wasn't found. At this point we don't know how many levels deep we have
+	// to create directories. The common case is that this directory doesn't exist, but the parent does. Let's
+	// check that case since it saves us a lot of work.
+	parentPath := filepath.Dir(path)
+	parentDir, err := s.FindDirByPath(projectID, parentPath)
+	if err == nil {
+		// Ok, the parent exists, so just create the child of the parent (ie, the complete path) and return
+		// the created directory.
+		return s.CreateDirectory(parentDir.ID, projectID, ownerID, path, filepath.Base(path))
+	}
+
+	// If we are here then the path didn't exist and the parent didn't exist so now we are going to traverse
+	// upwards constructing as we go. The way we do this is to split the path, retrieve the root, and then just
+	// start appending each entry of the path on, checking if it exists and if it doesn't then create it.
+
+	// Start with root and then go from there
+	parentDir, err = s.FindDirByPath(projectID, "/")
+	if err != nil {
+		return nil, err
+	}
+
+	pathParts := filepath.SplitList(path)
+	currentPath := "/"
+	for _, pathPart := range pathParts[1:] {
+		currentPath = filepath.Join(currentPath, pathPart)
+		dir, err = s.CreateDirIfNotExists(parentDir.ID, currentPath, filepath.Base(currentPath), projectID, ownerID)
+		if err != nil {
+			return nil, err
+		}
+		parentDir = dir
+	}
+
+	return dir, nil
+}
+
 func (s *FileStore) FindFileByPath(projectID int, path string) (*mcmodel.File, error) {
 	dirPath := filepath.Dir(path)
 	dir, err := s.FindDirByPath(projectID, dirPath)
