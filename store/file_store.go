@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/hashicorp/go-uuid"
@@ -237,7 +238,7 @@ func (s *FileStore) FindOrCreateDirPath(projectID, ownerID int, path string) (*m
 		return nil, err
 	}
 
-	pathParts := filepath.SplitList(path)
+	pathParts := strings.Split(path, "/")
 	currentPath := "/"
 	for _, pathPart := range pathParts[1:] {
 		currentPath = filepath.Join(currentPath, pathPart)
