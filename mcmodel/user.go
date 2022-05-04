@@ -10,6 +10,7 @@ type User struct {
 	Email      string `json:"email"`
 	GlobusUser string `json:"globus_user"`
 	ApiToken   string `json:"-"`
+	Password   string `json:"-"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
