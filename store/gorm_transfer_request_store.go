@@ -11,17 +11,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type TransferRequestStore struct {
+type GormTransferRequestStore struct {
 	db       *gorm.DB
 	mcfsRoot string
 }
 
-func NewTransferRequestStore(db *gorm.DB, mcfsRoot string) *TransferRequestStore {
-	return &TransferRequestStore{db: db, mcfsRoot: mcfsRoot}
+func NewGormTransferRequestStore(db *gorm.DB, mcfsRoot string) *GormTransferRequestStore {
+	return &GormTransferRequestStore{db: db, mcfsRoot: mcfsRoot}
 }
 
 // MarkFileReleased should only called for files that were created or opened with the Write flag set.
-func (s *TransferRequestStore) MarkFileReleased(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
+func (s *GormTransferRequestStore) MarkFileReleased(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
 	finfo, err := os.Stat(file.ToUnderlyingFilePath(s.mcfsRoot))
 	if err != nil {
 		log.Errorf("MarkFileReleased Stat %s failed: %s", file.ToUnderlyingFilePath(s.mcfsRoot), err)
@@ -78,7 +78,7 @@ func (s *TransferRequestStore) MarkFileReleased(file *mcmodel.File, checksum str
 	})
 }
 
-func (s *TransferRequestStore) MarkFileAsOpen(file *mcmodel.File) error {
+func (s *GormTransferRequestStore) MarkFileAsOpen(file *mcmodel.File) error {
 	return s.withTxRetry(func(tx *gorm.DB) error {
 		return tx.Model(&mcmodel.TransferRequestFile{}).
 			Where("file_id = ?", file.ID).
@@ -86,7 +86,7 @@ func (s *TransferRequestStore) MarkFileAsOpen(file *mcmodel.File) error {
 	})
 }
 
-func (s *TransferRequestStore) CreateNewFile(file, dir *mcmodel.File, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
+func (s *GormTransferRequestStore) CreateNewFile(file, dir *mcmodel.File, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
 	var err error
 	if file, err = s.addFileToDatabase(file, dir.ID, transferRequest, true); err != nil {
 		return file, err
@@ -102,7 +102,7 @@ func (s *TransferRequestStore) CreateNewFile(file, dir *mcmodel.File, transferRe
 	return file, nil
 }
 
-func (s *TransferRequestStore) CreateNewFileVersion(file, dir *mcmodel.File, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
+func (s *GormTransferRequestStore) CreateNewFileVersion(file, dir *mcmodel.File, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
 	var err error
 	if file, err = s.addFileToDatabase(file, dir.ID, transferRequest, false); err != nil {
 		return file, err
@@ -123,7 +123,7 @@ func (s *TransferRequestStore) CreateNewFileVersion(file, dir *mcmodel.File, tra
 // for the file. The TransferRequestFile will be created based on the file entry.
 // to the database. The file parameter must be filled out, except for the UUID which will be generated
 // for the file. The TransferRequestFile will be created based on the file entry.
-func (s *TransferRequestStore) addFileToDatabase(file *mcmodel.File, dirID int, transferRequest mcmodel.TransferRequest, updateProject bool) (*mcmodel.File, error) {
+func (s *GormTransferRequestStore) addFileToDatabase(file *mcmodel.File, dirID int, transferRequest mcmodel.TransferRequest, updateProject bool) (*mcmodel.File, error) {
 	var (
 		err                     error
 		transferFileRequestUUID string
@@ -170,7 +170,7 @@ func (s *TransferRequestStore) addFileToDatabase(file *mcmodel.File, dirID int, 
 	return file, err
 }
 
-func (s *TransferRequestStore) ListDirectory(dir *mcmodel.File, transferRequest mcmodel.TransferRequest) ([]mcmodel.File, error) {
+func (s *GormTransferRequestStore) ListDirectory(dir *mcmodel.File, transferRequest mcmodel.TransferRequest) ([]mcmodel.File, error) {
 	var files []mcmodel.File
 
 	err := s.db.Where("directory_id = ?", dir.ID).
@@ -216,7 +216,7 @@ func (s *TransferRequestStore) ListDirectory(dir *mcmodel.File, transferRequest 
 	return files, nil
 }
 
-func (s *TransferRequestStore) GetFileByPath(path string, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
+func (s *GormTransferRequestStore) GetFileByPath(path string, transferRequest mcmodel.TransferRequest) (*mcmodel.File, error) {
 	// Get directory so we can use its id for lookups
 	dirPath := filepath.Dir(path)
 	fileName := filepath.Base(path)
@@ -284,6 +284,6 @@ func incrementProjectFileTypeCountAndFilesCount(db *gorm.DB, projectID int, file
 	return db.Model(&p).Updates(&mcmodel.Project{FileTypes: fileTypesAsStr, FileCount: p.FileCount + 1}).Error
 }
 
-func (s *TransferRequestStore) withTxRetry(fn func(tx *gorm.DB) error) error {
+func (s *GormTransferRequestStore) withTxRetry(fn func(tx *gorm.DB) error) error {
 	return WithTxRetryDefault(fn, s.db)
 }

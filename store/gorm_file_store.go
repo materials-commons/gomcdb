@@ -12,17 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type FileStore struct {
+type GormFileStore struct {
 	db       *gorm.DB
 	mcfsRoot string
 }
 
-func NewFileStore(db *gorm.DB, mcfsRoot string) *FileStore {
-	return &FileStore{db: db, mcfsRoot: mcfsRoot}
+func NewGormFileStore(db *gorm.DB, mcfsRoot string) *GormFileStore {
+	return &GormFileStore{db: db, mcfsRoot: mcfsRoot}
 }
 
 // UpdateMetadataForFileAndProject updates the metadata and project meta data for a file
-func (s *FileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
+func (s *GormFileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
 	finfo, err := os.Stat(file.ToUnderlyingFilePath(s.mcfsRoot))
 	if err != nil {
 		log.Errorf("MarkFileReleased Stat %s failed: %s", file.ToUnderlyingFilePath(s.mcfsRoot), err)
@@ -63,7 +63,7 @@ func (s *FileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum
 	})
 }
 
-func (s *FileStore) CreateFile(name string, projectID, directoryID, ownerID int, mimeType string) (*mcmodel.File, error) {
+func (s *GormFileStore) CreateFile(name string, projectID, directoryID, ownerID int, mimeType string) (*mcmodel.File, error) {
 	newFile := &mcmodel.File{
 		ProjectID:   projectID,
 		Name:        name,
@@ -88,7 +88,7 @@ func (s *FileStore) CreateFile(name string, projectID, directoryID, ownerID int,
 	return newFile, err
 }
 
-func (s *FileStore) FindDirByPath(projectID int, path string) (*mcmodel.File, error) {
+func (s *GormFileStore) FindDirByPath(projectID int, path string) (*mcmodel.File, error) {
 	return findDirByPath(s.db, projectID, path)
 }
 
@@ -108,7 +108,7 @@ func findDirByPath(db *gorm.DB, projectID int, path string) (*mcmodel.File, erro
 	return &dir, nil
 }
 
-func (s *FileStore) CreateDirectory(parentDirID, projectID, ownerID int, path, name string) (*mcmodel.File, error) {
+func (s *GormFileStore) CreateDirectory(parentDirID, projectID, ownerID int, path, name string) (*mcmodel.File, error) {
 	var dir mcmodel.File
 	err := s.withTxRetry(func(tx *gorm.DB) error {
 		err := tx.Where("path = ", path).
@@ -151,7 +151,7 @@ func (s *FileStore) CreateDirectory(parentDirID, projectID, ownerID int, path, n
 	return &dir, err
 }
 
-func (s *FileStore) CreateDirIfNotExists(parentDirID int, path, name string, projectID, ownerID int) (*mcmodel.File, error) {
+func (s *GormFileStore) CreateDirIfNotExists(parentDirID int, path, name string, projectID, ownerID int) (*mcmodel.File, error) {
 	var (
 		dir *mcmodel.File
 		err error
@@ -191,7 +191,7 @@ func (s *FileStore) CreateDirIfNotExists(parentDirID int, path, name string, pro
 	return dir, err
 }
 
-func (s *FileStore) ListDirectoryByPath(projectID int, path string) ([]mcmodel.File, error) {
+func (s *GormFileStore) ListDirectoryByPath(projectID int, path string) ([]mcmodel.File, error) {
 	dir, err := s.FindDirByPath(projectID, path)
 	if err != nil {
 		return nil, err
@@ -210,7 +210,7 @@ func (s *FileStore) ListDirectoryByPath(projectID int, path string) ([]mcmodel.F
 }
 
 // FindOrCreateDirPath will create all entries in the directory path if the path doesn't exist
-func (s *FileStore) FindOrCreateDirPath(projectID, ownerID int, path string) (*mcmodel.File, error) {
+func (s *GormFileStore) FindOrCreateDirPath(projectID, ownerID int, path string) (*mcmodel.File, error) {
 	dir, err := s.FindDirByPath(projectID, path)
 	if err == nil {
 		// If we are here then the path was found, and we have nothing left to do.
@@ -252,7 +252,7 @@ func (s *FileStore) FindOrCreateDirPath(projectID, ownerID int, path string) (*m
 	return dir, nil
 }
 
-func (s *FileStore) FindFileByPath(projectID int, path string) (*mcmodel.File, error) {
+func (s *GormFileStore) FindFileByPath(projectID int, path string) (*mcmodel.File, error) {
 	dirPath := filepath.Dir(path)
 	dir, err := s.FindDirByPath(projectID, dirPath)
 	if err != nil {
@@ -274,7 +274,7 @@ func (s *FileStore) FindFileByPath(projectID int, path string) (*mcmodel.File, e
 	return &file, nil
 }
 
-func (s *FileStore) UpdateFileUses(file *mcmodel.File, uuid string, fileID int) error {
+func (s *GormFileStore) UpdateFileUses(file *mcmodel.File, uuid string, fileID int) error {
 	return s.withTxRetry(func(tx *gorm.DB) error {
 		return tx.Model(file).Updates(mcmodel.File{
 			UsesUUID: uuid,
@@ -283,7 +283,7 @@ func (s *FileStore) UpdateFileUses(file *mcmodel.File, uuid string, fileID int) 
 	})
 }
 
-func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
+func (s *GormFileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
 	switched := false // Set to true in withTxRetry if an existing file with same checksum is found
 	err := s.withTxRetry(func(tx *gorm.DB) error {
 		var matched mcmodel.File
@@ -307,6 +307,6 @@ func (s *FileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error) {
 	return switched, err
 }
 
-func (s *FileStore) withTxRetry(fn func(tx *gorm.DB) error) error {
+func (s *GormFileStore) withTxRetry(fn func(tx *gorm.DB) error) error {
 	return WithTxRetryDefault(fn, s.db)
 }

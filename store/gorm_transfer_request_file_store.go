@@ -8,16 +8,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type TransferRequestFileStore struct {
+type GormTransferRequestFileStore struct {
 	db        *gorm.DB
-	fileStore *FileStore
+	fileStore *GormFileStore
 }
 
-func NewTransferRequestFileStore(db *gorm.DB) *TransferRequestFileStore {
-	return &TransferRequestFileStore{db: db, fileStore: NewFileStore(db, "")}
+func NewGormTransferRequestFileStore(db *gorm.DB) *GormTransferRequestFileStore {
+	return &GormTransferRequestFileStore{db: db, fileStore: NewGormFileStore(db, "")}
 }
 
-func (s *TransferRequestFileStore) DeleteTransferFileRequestByPath(ownerID, projectID int, path string) error {
+func (s *GormTransferRequestFileStore) DeleteTransferFileRequestByPath(ownerID, projectID int, path string) error {
 	dirPath := filepath.Dir(path)
 	fileName := filepath.Base(path)
 
@@ -37,7 +37,7 @@ func (s *TransferRequestFileStore) DeleteTransferFileRequestByPath(ownerID, proj
 	})
 }
 
-func (s *TransferRequestFileStore) GetTransferFileRequestByPath(ownerID, projectID int, path string) (*mcmodel.TransferRequestFile, error) {
+func (s *GormTransferRequestFileStore) GetTransferFileRequestByPath(ownerID, projectID int, path string) (*mcmodel.TransferRequestFile, error) {
 	dirPath := filepath.Dir(path)
 	fileName := filepath.Base(path)
 
@@ -57,12 +57,12 @@ func (s *TransferRequestFileStore) GetTransferFileRequestByPath(ownerID, project
 	return &transferRequestFile, err
 }
 
-func (s *TransferRequestFileStore) DeleteTransferRequestFile(transferRequestFile *mcmodel.TransferRequestFile) error {
+func (s *GormTransferRequestFileStore) DeleteTransferRequestFile(transferRequestFile *mcmodel.TransferRequestFile) error {
 	return s.withTxRetry(func(tx *gorm.DB) error {
 		return tx.Delete(transferRequestFile).Error
 	})
 }
 
-func (s *TransferRequestFileStore) withTxRetry(fn func(tx *gorm.DB) error) error {
+func (s *GormTransferRequestFileStore) withTxRetry(fn func(tx *gorm.DB) error) error {
 	return WithTxRetryDefault(fn, s.db)
 }

@@ -6,15 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type ConversionStore struct {
+type GormConversionStore struct {
 	db *gorm.DB
 }
 
-func NewConversionStore(db *gorm.DB) *ConversionStore {
-	return &ConversionStore{db: db}
+func NewGormConversionStore(db *gorm.DB) *GormConversionStore {
+	return &GormConversionStore{db: db}
 }
 
-func (s *ConversionStore) AddFileToConvert(file *mcmodel.File) (*mcmodel.Conversion, error) {
+func (s *GormConversionStore) AddFileToConvert(file *mcmodel.File) (*mcmodel.Conversion, error) {
 	var err error
 
 	c := &mcmodel.Conversion{
@@ -34,6 +34,6 @@ func (s *ConversionStore) AddFileToConvert(file *mcmodel.File) (*mcmodel.Convers
 	return c, err
 }
 
-func (s *ConversionStore) withTxRetry(fn func(tx *gorm.DB) error) error {
+func (s *GormConversionStore) withTxRetry(fn func(tx *gorm.DB) error) error {
 	return WithTxRetryDefault(fn, s.db)
 }
