@@ -13,7 +13,7 @@ func NewGormProjectStore(db *gorm.DB) *GormProjectStore {
 	return &GormProjectStore{db: db}
 }
 
-func (s *GormProjectStore) FindProject(projectID int) (*mcmodel.Project, error) {
+func (s *GormProjectStore) GetProjectByID(projectID int) (*mcmodel.Project, error) {
 	var project mcmodel.Project
 	err := s.db.Find(&project, projectID).Error
 	if err != nil {

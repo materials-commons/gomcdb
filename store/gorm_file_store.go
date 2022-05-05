@@ -88,7 +88,7 @@ func (s *GormFileStore) CreateFile(name string, projectID, directoryID, ownerID 
 	return newFile, err
 }
 
-func (s *GormFileStore) FindDirByPath(projectID int, path string) (*mcmodel.File, error) {
+func (s *GormFileStore) GetDirByPath(projectID int, path string) (*mcmodel.File, error) {
 	return findDirByPath(s.db, projectID, path)
 }
 
@@ -192,7 +192,7 @@ func (s *GormFileStore) CreateDirIfNotExists(parentDirID int, path, name string,
 }
 
 func (s *GormFileStore) ListDirectoryByPath(projectID int, path string) ([]mcmodel.File, error) {
-	dir, err := s.FindDirByPath(projectID, path)
+	dir, err := s.GetDirByPath(projectID, path)
 	if err != nil {
 		return nil, err
 	}
@@ -209,9 +209,9 @@ func (s *GormFileStore) ListDirectoryByPath(projectID int, path string) ([]mcmod
 	return files, err
 }
 
-// FindOrCreateDirPath will create all entries in the directory path if the path doesn't exist
-func (s *GormFileStore) FindOrCreateDirPath(projectID, ownerID int, path string) (*mcmodel.File, error) {
-	dir, err := s.FindDirByPath(projectID, path)
+// GetOrCreateDirPath will create all entries in the directory path if the path doesn't exist
+func (s *GormFileStore) GetOrCreateDirPath(projectID, ownerID int, path string) (*mcmodel.File, error) {
+	dir, err := s.GetDirByPath(projectID, path)
 	if err == nil {
 		// If we are here then the path was found, and we have nothing left to do.
 		return dir, nil
@@ -221,7 +221,7 @@ func (s *GormFileStore) FindOrCreateDirPath(projectID, ownerID int, path string)
 	// to create directories. The common case is that this directory doesn't exist, but the parent does. Let's
 	// check that case since it saves us a lot of work.
 	parentPath := filepath.Dir(path)
-	parentDir, err := s.FindDirByPath(projectID, parentPath)
+	parentDir, err := s.GetDirByPath(projectID, parentPath)
 	if err == nil {
 		// Ok, the parent exists, so just create the child of the parent (ie, the complete path) and return
 		// the created directory.
@@ -233,7 +233,7 @@ func (s *GormFileStore) FindOrCreateDirPath(projectID, ownerID int, path string)
 	// start appending each entry of the path on, checking if it exists and if it doesn't then create it.
 
 	// Start with root and then go from there
-	parentDir, err = s.FindDirByPath(projectID, "/")
+	parentDir, err = s.GetDirByPath(projectID, "/")
 	if err != nil {
 		return nil, err
 	}
@@ -252,9 +252,9 @@ func (s *GormFileStore) FindOrCreateDirPath(projectID, ownerID int, path string)
 	return dir, nil
 }
 
-func (s *GormFileStore) FindFileByPath(projectID int, path string) (*mcmodel.File, error) {
+func (s *GormFileStore) GetFileByPath(projectID int, path string) (*mcmodel.File, error) {
 	dirPath := filepath.Dir(path)
-	dir, err := s.FindDirByPath(projectID, dirPath)
+	dir, err := s.GetDirByPath(projectID, dirPath)
 	if err != nil {
 		return nil, err
 	}
