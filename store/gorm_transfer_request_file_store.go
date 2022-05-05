@@ -21,7 +21,7 @@ func (s *GormTransferRequestFileStore) DeleteTransferFileRequestByPath(ownerID, 
 	dirPath := filepath.Dir(path)
 	fileName := filepath.Base(path)
 
-	dir, err := s.fileStore.FindDirByPath(projectID, dirPath)
+	dir, err := s.fileStore.GetDirByPath(projectID, dirPath)
 	if err != nil {
 		log.Errorf("Unable to find directory for path %s in project %d: %s", dirPath, projectID, err)
 		return err
@@ -41,7 +41,7 @@ func (s *GormTransferRequestFileStore) GetTransferFileRequestByPath(ownerID, pro
 	dirPath := filepath.Dir(path)
 	fileName := filepath.Base(path)
 
-	dir, err := s.fileStore.FindDirByPath(projectID, dirPath)
+	dir, err := s.fileStore.GetDirByPath(projectID, dirPath)
 	if err != nil {
 		log.Errorf("Unable to find directory for path %s in project %d: %s", dirPath, projectID, err)
 		return nil, err
