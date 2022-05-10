@@ -17,6 +17,7 @@ type FileStore interface {
 	GetFileByPath(projectID int, path string) (*mcmodel.File, error)
 	UpdateFileUses(file *mcmodel.File, uuid string, fileID int) error
 	PointAtExistingIfExists(file *mcmodel.File) (bool, error)
+	DoneWritingToFile(file *mcmodel.File, checksum string, size int64, conversionStore ConversionStore) (bool, error)
 }
 
 type ProjectStore interface {
