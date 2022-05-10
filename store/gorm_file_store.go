@@ -22,7 +22,7 @@ func NewGormFileStore(db *gorm.DB, mcfsRoot string) *GormFileStore {
 }
 
 // UpdateMetadataForFileAndProject updates the metadata and project meta data for a file
-func (s *GormFileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error {
+func (s *GormFileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, totalBytes int64) error {
 	finfo, err := os.Stat(file.ToUnderlyingFilePath(s.mcfsRoot))
 	if err != nil {
 		log.Errorf("MarkFileReleased Stat %s failed: %s", file.ToUnderlyingFilePath(s.mcfsRoot), err)
@@ -55,7 +55,7 @@ func (s *GormFileStore) UpdateMetadataForFileAndProject(file *mcmodel.File, chec
 
 		var project mcmodel.Project
 
-		if result := tx.Find(&project, projectID); result.Error != nil {
+		if result := tx.Find(&project, file.ProjectID); result.Error != nil {
 			return result.Error
 		}
 
@@ -305,6 +305,39 @@ func (s *GormFileStore) PointAtExistingIfExists(file *mcmodel.File) (bool, error
 	})
 
 	return switched, err
+}
+
+// DoneWritingToFile is called when a file has been opened for writing and the caller is finished writing to it.
+// It consolidates common steps such as updating metadata, switching to point to a file that already exists with
+// the same checksum, and queuing the file for conversion (if needed).
+func (s *GormFileStore) DoneWritingToFile(file *mcmodel.File, checksum string, size int64, conversionStore ConversionStore) (bool, error) {
+	var (
+		fileSwitched = false
+		err          error
+	)
+
+	if err = s.UpdateMetadataForFileAndProject(file, checksum, size); err != nil {
+		log.Errorf("failure updating file (%d) and project (%d) metadata: %s", file.ID, file.ProjectID, err)
+		return false, err
+	}
+
+	// Check if there is a file with matching checksum, and if so have the file point at it.
+	if fileSwitched, err = s.PointAtExistingIfExists(file); err != nil {
+		// Some error returned, so file wasn't switched.
+		return false, err
+	}
+
+	// Check if file type is one we do a conversion on to make viewable on the web, and if it is
+	// then schedule a conversion to run.
+	if file.IsConvertible() {
+		// Queue up a conversion job
+		if _, err = conversionStore.AddFileToConvert(file); err != nil {
+			log.Errorf("failed adding file %d to be converted: %s", file.ID, err)
+			return fileSwitched, err
+		}
+	}
+
+	return fileSwitched, nil
 }
 
 func (s *GormFileStore) withTxRetry(fn func(tx *gorm.DB) error) error {
