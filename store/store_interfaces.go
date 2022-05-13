@@ -7,7 +7,7 @@ type ConversionStore interface {
 }
 
 type FileStore interface {
-	UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, projectID int, totalBytes int64) error
+	UpdateMetadataForFileAndProject(file *mcmodel.File, checksum string, totalBytes int64) error
 	CreateFile(name string, projectID, directoryID, ownerID int, mimeType string) (*mcmodel.File, error)
 	GetDirByPath(projectID int, path string) (*mcmodel.File, error)
 	CreateDirectory(parentDirID, projectID, ownerID int, path, name string) (*mcmodel.File, error)
