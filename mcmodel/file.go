@@ -1,7 +1,9 @@
 package mcmodel
 
 import (
+	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -124,10 +126,10 @@ func (f FileInfo) Size() int64 {
 
 func (f FileInfo) Mode() fs.FileMode {
 	if f.file.IsDir() {
-		return fs.ModePerm & fs.ModeDir
+		return os.FileMode(0777) | os.ModeDir
 	}
 
-	return fs.ModePerm
+	return fs.FileMode(0777)
 }
 
 func (f FileInfo) ModTime() time.Time {
@@ -135,6 +137,7 @@ func (f FileInfo) ModTime() time.Time {
 }
 
 func (f FileInfo) IsDir() bool {
+	fmt.Println("Calling IsDir")
 	return f.file.IsDir()
 }
 
