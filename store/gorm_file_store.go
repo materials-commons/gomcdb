@@ -253,6 +253,10 @@ func (s *GormFileStore) GetOrCreateDirPath(projectID, ownerID int, path string) 
 }
 
 func (s *GormFileStore) GetFileByPath(projectID int, path string) (*mcmodel.File, error) {
+	if path == "/" {
+		return s.GetDirByPath(projectID, path)
+	}
+
 	dirPath := filepath.Dir(path)
 	dir, err := s.GetDirByPath(projectID, dirPath)
 	if err != nil {
