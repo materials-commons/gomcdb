@@ -1,7 +1,6 @@
 package mcmodel
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -137,7 +136,6 @@ func (f FileInfo) ModTime() time.Time {
 }
 
 func (f FileInfo) IsDir() bool {
-	fmt.Println("Calling IsDir")
 	return f.file.IsDir()
 }
 
