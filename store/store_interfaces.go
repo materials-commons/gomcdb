@@ -23,7 +23,7 @@ type FileStore interface {
 type ProjectStore interface {
 	GetProjectByID(projectID int) (*mcmodel.Project, error)
 	GetProjectBySlug(slug string) (*mcmodel.Project, error)
-	GetProjectsForUser(userID int) (error, []mcmodel.Project)
+	GetProjectsForUser(userID int) ([]mcmodel.Project, error)
 	UpdateProjectSizeAndFileCount(projectID int, size int64, fileCount int) error
 	UpdateProjectDirectoryCount(projectID int, directoryCount int) error
 	UserCanAccessProject(userID, projectID int) bool

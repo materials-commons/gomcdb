@@ -32,13 +32,13 @@ func (s *GormProjectStore) GetProjectBySlug(slug string) (*mcmodel.Project, erro
 	return &project, nil
 }
 
-func (s *GormProjectStore) GetProjectsForUser(userID int) (error, []mcmodel.Project) {
+func (s *GormProjectStore) GetProjectsForUser(userID int) ([]mcmodel.Project, error) {
 	var projects []mcmodel.Project
 
 	err := s.db.Where("team_id in (select team_id from team2admin where user_id = ?)", userID).
 		Or("team_id in (select team_id from team2member where user_id = ?)", userID).
 		Find(&projects).Error
-	return err, projects
+	return projects, err
 }
 
 func (s *GormProjectStore) UpdateProjectSizeAndFileCount(projectID int, size int64, fileCount int) error {
