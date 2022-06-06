@@ -13,10 +13,10 @@ func NewGormUserStore(db *gorm.DB) *GormUserStore {
 	return &GormUserStore{db: db}
 }
 
-func (s *GormUserStore) GetUsersWithGlobusAccount() (error, []mcmodel.User) {
+func (s *GormUserStore) GetUsersWithGlobusAccount() ([]mcmodel.User, error) {
 	var users []mcmodel.User
 	result := s.db.Where("globus_user is not null").Find(&users)
-	return result.Error, users
+	return users, result.Error
 }
 
 func (s *GormUserStore) GetUserBySlug(slug string) (*mcmodel.User, error) {

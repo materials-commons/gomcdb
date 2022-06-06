@@ -45,6 +45,6 @@ type TransferRequestStore interface {
 }
 
 type UserStore interface {
-	GetUsersWithGlobusAccount() (error, []mcmodel.User)
+	GetUsersWithGlobusAccount() ([]mcmodel.User, error)
 	GetUserBySlug(slug string) (*mcmodel.User, error)
 }
